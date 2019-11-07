@@ -1,0 +1,232 @@
+﻿<Window x:Class="HJSIR647.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+        xmlns:local="clr-namespace:HJSIR647"
+        mc:Ignorable="d"
+        Title="HJSIR647" Height="600" Width="800" Loaded="Window_Loaded" WindowState="Maximized">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height = "20"/>
+            <RowDefinition Height = "100"/>
+            <RowDefinition Height = "2*"/>
+            <RowDefinition Height = "*"/>
+            <RowDefinition Height = "*"/>
+            <RowDefinition Height = "25"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width = "*" />
+            <ColumnDefinition Width = "200" />
+        </Grid.ColumnDefinitions>
+
+        <DockPanel  Grid.Column="0" Grid.Row="0"  Grid.ColumnSpan="2">
+            <Menu DockPanel.Dock="Top">
+                <MenuItem Header="_Query List">
+                    <MenuItem x:Name="miQueryOpen" Header="_Open Query List" Click="MiQueryOpen_Click"/>
+                </MenuItem>
+                <MenuItem Header="_Tools">
+                    <MenuItem x:Name="miCreateQrels" Header="_Create Qrels" Click="MiCreateQrels_Click"/>
+                </MenuItem>
+            </Menu>
+            <StackPanel></StackPanel>
+        </DockPanel>
+        
+        <Border Grid.Column="0" Grid.Row="1"  Grid.ColumnSpan="2"
+                Margin="1 1"  BorderBrush="Black" BorderThickness="1" CornerRadius="3">
+            <Grid x:Name="gdSearchProc">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height = "*"/>
+                    <RowDefinition Height = "3*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width = "*" />
+                    <ColumnDefinition Width = "60" />
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="tbInputQuery" Text="what is rba" Grid.Column="0" Grid.Row="0"/>
+                <Button x:Name="btSearch" Margin="1 1" Content="Search" Grid.Column="1" Grid.Row="0" Click="btSearch_Click"/>
+                <ScrollViewer Grid.Column="0" Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <TextBlock x:Name="tbProcessedQuery" TextWrapping="Wrap" 
+                           Text="{Binding Path=ProcessedQuery, UpdateSourceTrigger=PropertyChanged}"/>
+                </ScrollViewer>
+                <Button x:Name="btIndexing" Margin="1 1" Content="Indexing" Grid.Column="1" Grid.Row="1" Click="btIndexing_Click"/>
+            </Grid>            
+        </Border>
+
+        <Border Grid.Column="0" Grid.Row="2"
+                Margin="1 1"  BorderBrush="Black" BorderThickness="1" CornerRadius="3">
+            <ListView x:Name="searchedListView" SelectionChanged="SearchedListView_SelectionChanged">
+                <ListView.Resources>
+                    <Style TargetType="{x:Type ListViewItem}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsRelevantDoc}" Value="true">
+                                <Setter Property="Background" Value="LightGreen"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListView.Resources>
+                <ListView.View >
+                    <GridView x:Name="gridView" AllowsColumnReorder="False">
+                        <GridViewColumn Header="Rank[%]" Width="50"
+                                        DisplayMemberBinding="{Binding Path=Rank, UpdateSourceTrigger=PropertyChanged}"/>
+                        <GridViewColumn Header="PassageID" Width="80" 
+                                        DisplayMemberBinding="{Binding Path=PassageID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <GridViewColumn Header="Title" Width="150" 
+                                        DisplayMemberBinding="{Binding Path=Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <GridViewColumn Header="URL" Width="250" 
+                                        DisplayMemberBinding="{Binding Path=Url, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <GridViewColumn Header="Passage" Width="Auto" 
+                                        DisplayMemberBinding="{Binding Path=Passage, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </Border>
+        <Border Grid.Column="0" Grid.Row="3" 
+                Margin="1 1"  BorderBrush="Black" BorderThickness="1" CornerRadius="3">
+            <WebBrowser  x:Name="selectedItem" />
+        </Border>
+        <Border Grid.Column="0" Grid.Row="4" 
+                Margin="1 1"  BorderBrush="Black" BorderThickness="1" CornerRadius="3">
+            <Grid x:Name="gridPerformance">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height = "*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width = "*" />
+                    <ColumnDefinition Width = "*" />
+                </Grid.ColumnDefinitions>
+                <lvc:CartesianChart x:Name="lcIndexPerformance" Series="{Binding IndexSeriesData}" LegendLocation="Top"
+                                    Grid.Column="0" Grid.Row="0">
+                    <lvc:CartesianChart.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem x:Name="miClearIndexChart" Header="Clear Graph" Click="MiClearIndexChart_Click" />
+                        </ContextMenu>
+                    </lvc:CartesianChart.ContextMenu>
+                    <lvc:CartesianChart.Resources>
+                        <Style TargetType="lvc:DefaultTooltip">
+                            <Setter Property="ShowSeries" Value="False"></Setter>
+                        </Style>
+                    </lvc:CartesianChart.Resources>
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis Title="Performance[ms]" />
+                    </lvc:CartesianChart.AxisY>
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis MinValue="1"/>
+                    </lvc:CartesianChart.AxisX>
+                </lvc:CartesianChart>
+                <lvc:CartesianChart x:Name="lcSearchPerformance" Series="{Binding SearchSeriesData}" LegendLocation="Top"
+                                    Grid.Column="1" Grid.Row="0">
+                    <lvc:CartesianChart.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem x:Name="miClearSearchChart" Header="Clear Graph" Click="MiClearSearchChart_Click" />
+                        </ContextMenu>
+                    </lvc:CartesianChart.ContextMenu>
+                    <lvc:CartesianChart.Resources>
+                        <Style TargetType="lvc:DefaultTooltip">
+                            <Setter Property="ShowSeries" Value="False"></Setter>
+                        </Style>
+                    </lvc:CartesianChart.Resources>
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis Title="Performance[ms]" />
+                    </lvc:CartesianChart.AxisY>
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis MinValue="1"/>
+                    </lvc:CartesianChart.AxisX>
+                </lvc:CartesianChart>
+            </Grid>
+        </Border>
+
+        <StatusBar x:Name="sbStatusBar" Grid.ColumnSpan="2" Grid.Column="0" Grid.Row="5">
+            <StatusBarItem>
+                <TextBlock x:Name="tbProcStatus" Width="200" Text="{Binding Path=ProcStatus, UpdateSourceTrigger=PropertyChanged}"/>
+            </StatusBarItem>
+            <Separator Grid.Column="1" />
+            <StatusBarItem>
+                <TextBlock x:Name="tbNumRelevants" Width="200" Text="{Binding Path=NumRelevants, UpdateSourceTrigger=PropertyChanged}"/>
+            </StatusBarItem>
+            <Separator Grid.Column="1" />
+            <StatusBarItem>
+                <TextBlock x:Name="tbNumSearch" Width="150" Text="{Binding Path=NumSearch, UpdateSourceTrigger=PropertyChanged}"/>
+            </StatusBarItem>
+            <Separator Grid.Column="1" />            
+            <StatusBarItem>                
+                <StatusBarItem HorizontalContentAlignment="Stretch">
+                    <ProgressBar x:Name="ProgressBarMain" Value="0" Height="15" Width="200"/>
+                </StatusBarItem>
+            </StatusBarItem>
+        </StatusBar>
+
+        <Border Grid.RowSpan="3" Grid.Column="2" Grid.Row="2" 
+                Margin="1 1"  BorderBrush="Black" BorderThickness="1" CornerRadius="3">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel x:Name="SettingPanel">
+                    <GroupBox Margin="1 1" Header="General Options">
+                        <StackPanel>
+                            <Label x:Name="lbCollectionPath" Margin="1 1" ToolTip="{Binding Path=CollectionPath}"
+                            Content="{Binding Path=CollectionPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button x:Name="btCollection"  Margin="1 1" Content="Collection Path" Click="btCollection_Click"></Button>
+                            <Separator/>
+                            <Label x:Name="lbIndexPath" Margin="1 1" ToolTip="{Binding Path=IndexPath}"
+                            Content="{Binding Path=IndexPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <Button x:Name="btIndex" Margin="1 1" Content="Index Path" Click="btIndex_Click"/>
+                            <Separator/>
+                            <CheckBox x:Name="cbNoPreProcessing" Margin="1 1" Content="No Pre-Processing"
+                          IsChecked="{Binding Path=NoPreProcessing}"/>
+                            <CheckBox x:Name="cbLoggingGraph" Margin="1 1" Content="Logging Graph"
+                          IsChecked="{Binding Path=LoggingGraph}"/>
+                            <Separator/>
+                            <CheckBox x:Name="cbLoggingTrec" Margin="1 1" Content="Logging Trec"
+                          IsChecked="{Binding Path=LoggingTrec}"/>
+                            <Label x:Name="lbSaveLoggingPath" Margin="1 1" ToolTip="{Binding Path=LoggingPath}"
+                       Content="{Binding Path=LoggingPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button x:Name="btLogging" Margin="1 1" Content="Logging Path" Click="btLogging_Click"/>
+                        </StackPanel>
+                    </GroupBox>
+                    <GroupBox Margin="1 1" Header="Advanced System Options">
+                        <StackPanel>
+                            <CheckBox x:Name="cbAdvancedSearch" Margin="1 1" Content="Enable Advanced Search" IsChecked="{Binding Path=AdvancedSearch}"                           
+                                  Unchecked="cbAdvancedSearch_Unchecked" Checked="cbAdvancedSearch_Checked"/>
+                            <GroupBox Margin="1 1" Header="Stop Words">
+                                <StackPanel>
+                                    <CheckBox x:Name="cbStopWords" Margin="1 1" Content="Stop Words"
+                                  IsChecked="{Binding Path=StopWords}"/>
+                                </StackPanel>
+                            </GroupBox>
+                            <GroupBox Margin="1 1" Header="Stemming">
+                                <StackPanel>
+                                    <CheckBox x:Name="cbStemming" Margin="1 1" Content="Stemming"
+                                  IsChecked="{Binding Path=Stemming}"/>
+                                </StackPanel>
+                            </GroupBox>
+                            <GroupBox Margin="1 1" Header="Search Synonyms">
+                                <StackPanel>
+                                    <CheckBox x:Name="cbSynAdjective" Margin="1 1" Content="Adjective"
+                                      IsChecked="{Binding Path=SynAdjective}"/>
+                                    <CheckBox x:Name="cbSynAdverb" Margin="1 1" Content="Adverb"
+                                  IsChecked="{Binding Path=SynAdverb}"/>
+                                    <CheckBox x:Name="cbSynNoun" Margin="1 1" Content="Noun"
+                                  IsChecked="{Binding Path=SynNoun}"/>
+                                    <CheckBox x:Name="cbSynVerb" Margin="1 1" Content="Verb"
+                                  IsChecked="{Binding Path=SynVerb}"/>
+                                </StackPanel>
+                            </GroupBox>
+                            <GroupBox Margin="1 1" Header="Boosting">
+                                <StackPanel>
+                                    <CheckBox x:Name="cbQueryBoosting" Margin="1 1" Content="Query Boosting"
+                                  IsChecked="{Binding Path=QueryBoosting}"/>
+                                    <ComboBox x:Name="combFieldBoosting" Margin="1 1" 
+                                          ItemsSource="{Binding Path=FieldBoostingList}"
+                                          SelectedItem="{Binding Path=SelectedFieldBoosting}"/>
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+                    </GroupBox>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+    </Grid>
+</Window>
